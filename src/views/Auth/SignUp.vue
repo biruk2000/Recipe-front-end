@@ -23,11 +23,12 @@
       <div class="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
         <div class="w-full">
           <h1 class="mb-4 text-xl font-semibold text-gray-700">Sign up</h1>
-          <form action="" @submit.prevent="signUpUser">
+          <VeeForm action="" @submit="signUpUser" :validation-schema="schema">
             <label for="" class="block text-sm">
               <span class="text-gray-700">User Name</span>
-              <input
+              <VeeField
                 v-model="username"
+                name="username"
                 type="text"
                 placeholder="Enter User name"
                 class="
@@ -44,11 +45,13 @@
                   w-full
                 "
               />
+              <ErrorMessage class="text-red-600" name="username" />
             </label>
             <label for="" class="block text-sm">
               <span class="text-gray-700">Email</span>
-              <input
+              <VeeField
                 v-model="email"
+                name="email"
                 type="text"
                 placeholder="Enter Email"
                 class="
@@ -65,11 +68,13 @@
                   w-full
                 "
               />
+              <ErrorMessage class="text-red-600" name="email" />
             </label>
             <label for="" class="block mt-4 text-sm">
               <span class="text-gray-700">Password</span>
-              <input
+              <VeeField
                 v-model="password"
+                name="password"
                 type="password"
                 placeholder="Enter Your password"
                 class="
@@ -86,11 +91,13 @@
                   w-full
                 "
               />
+              <ErrorMessage class="text-red-600" name="password" />
             </label>
             <label for="" class="block mt-4 text-sm">
               <span class="text-gray-700">Confirm Password</span>
-              <input
+              <VeeField
                 type="password"
+                name="confirm_password"
                 placeholder="confirm Your password"
                 class="
                   mt-1
@@ -106,6 +113,7 @@
                   w-full
                 "
               />
+              <ErrorMessage class="text-red-600" name="confirm_password" />
             </label>
             <button
               class="
@@ -130,7 +138,7 @@
             >
               Sign Up
             </button>
-          </form>
+          </VeeForm>
           <hr class="my-8" />
           <button
             class="
@@ -178,6 +186,12 @@ export default {
       username: "",
       email: "",
       password: "",
+      schema:{
+        username: 'required|max:10',
+        email: 'required|email',
+        password: 'required|min:4',
+        confirm_password: 'password_mismatch:@password'
+      }
     };
   },
   methods: {
@@ -187,6 +201,12 @@ export default {
         email: this.email,
         password: this.password,
       });
+      // const values = {
+      //   username: this.username,
+      //   email: this.email,
+      //   password: this.password
+      // }
+      // console.log(values)
     },
   },
 };

@@ -23,49 +23,59 @@
       <div class="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
         <div class="w-full">
           <h1 class="mb-4 text-xl font-semibold text-gray-700">Login</h1>
-            <form action="">
+          <VeeForm action="" @submit="loginUser" :validation-schema="schema">
             <label for="" class="block text-sm">
-                <span class="text-gray-700">Email</span>
-                <input
+              <span class="text-gray-700">Email</span>
+              <VeeField
+                name="email"
+                :rules="isRequired"
                 type="text"
-                placeholder="Enter Your Email"
+                placeholder="Enter your email"
+                v-model="email"
                 class="
-                    mt-1
-                    px-3
-                    py-2
-                    block
-                    placeholder-blueGray-300
-                    text-blueGray-600 text-sm
-                    border
-                    rounded
-                    outline-none
-                    focus:outline-none focus:ring-2 focus:ring-blue-400
-                    w-full
+                  mt-1
+                  px-3
+                  py-2
+                  block
+                  placeholder-blueGray-300
+                  text-blueGray-600 text-sm
+                  border
+                  rounded
+                  outline-none
+                  focus:outline-none focus:ring-2 focus:ring-blue-400
+                  w-full
                 "
-                />
+              />
+              <ErrorMessage class="text-red-600" name="email" />
             </label>
             <label for="" class="block mt-4 text-sm">
-                <span class="text-gray-700">Password</span>
-                <input
+              <span class="text-gray-700">Password</span>
+              <VeeField
+                v-model="password"
+                name="password"
                 type="password"
                 placeholder="Enter Your password"
                 class="
-                    mt-1
-                    px-3
-                    py-2
-                    block
-                    placeholder-blueGray-300
-                    text-blueGray-600 text-sm
-                    border
-                    rounded
-                    outline-none
-                    focus:outline-none focus:ring-2 focus:ring-blue-400
-                    w-full
+                  mt-1
+                  px-3
+                  py-2
+                  block
+                  placeholder-blueGray-300
+                  text-blueGray-600 text-sm
+                  border
+                  rounded
+                  outline-none
+                  focus:outline-none focus:ring-2 focus:ring-blue-400
+                  w-full
                 "
-                />
+              />
+              <ErrorMessage class="text-red-600" name="password" />
+            </label>
+            <label for="" class="block mt-4 text-sm">
+              <span>Field</span>
             </label>
             <button
-                class="
+              class="
                 block
                 w-full
                 px-4
@@ -79,14 +89,14 @@
                 duration-150
                 bg-blue-600
                 border-transparent
-                rounded-lg 
+                rounded-lg
                 hover:bg-blue-700
                 focus:outline-none focus:shadow-outline-blue
-                "
+              "
             >
-                Log in
+              Log in
             </button>
-            </form>
+          </VeeForm>
           <hr class="my-8" />
           <button
             class="
@@ -100,9 +110,9 @@
               font-medium
               leading-5
               text-white
-              transition-colors duration-150
-              border
-              border-gray-300
+              transition-colors
+              duration-150
+              border border-gray-300
               bg-red-600
               rounded-lg
             "
@@ -110,13 +120,49 @@
             Google
           </button>
           <p class="mt-2">
-              <span class="text-sm font-medium text-blue-600">Dont't have an account?</span>
-              <router-link to="/user/signup" class="text-sm font-medium hover:underline">
-                  Sign up
-              </router-link>
+            <span class="text-sm font-medium text-blue-600"
+              >Dont't have an account?</span
+            >
+            <router-link
+              to="/user/signup"
+              class="text-sm font-medium hover:underline"
+            >
+              Sign up
+            </router-link>
           </p>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script>
+
+export default {
+  name: "login",
+  components: {
+   
+  },
+  data() {
+    return {
+      email: "",
+      password: "",
+      schema: {
+        email: 'required|email|min:4',
+        password: 'required|min:4'
+      }
+    };
+  },
+  methods: {
+    loginUser() {
+      this.$store.dispatch("loginUser", {
+        email: this.email,
+        password: this.password,
+      });
+    },
+    // isRequired(value) {
+    //   return value ? true : "This field is required";
+    // },
+  },
+};
+</script>

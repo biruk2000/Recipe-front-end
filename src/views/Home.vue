@@ -21,21 +21,84 @@
       </select>
     </div>
     <div class="grid lg:grid-cols-3 gap-10">
-      <div v-for="i in 2"
-      :key="i">
-        <Card></Card>
+      <div v-for="recipe in Recipes"
+      :key="recipe.id">
+        <router-link to="/recipes/55">
+          <Card :recipe="recipe"></Card>
+        </router-link>
       </div>
+    </div>
+    <div class="mx-auto container mt-5" v-if="showMoreEnabled">
+      <button @click="fetchMore" class="py-5 text-white bg-blue-600">Fech more</button>
     </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import {INFINITE_SCROLL_POST} from "../queries/Recipes"
 import Card from '../components/Recipe/Card.vue'
+import {mapGetters} from 'vuex'
+const pageSize = 3;
+
 export default {
   name: 'Home',
+  data(){
+    return{
+      Recipes: [],
+      page: 0,
+      showMoreEnabled: true
+      // totalRecipes: this.totalRecipes.length
+    }
+  },
   components: {
     Card
+  },
+  apollo: {
+    Recipes: {
+      query: INFINITE_SCROLL_POST,
+      variables: {
+        offset: 0,
+        limit: pageSize
+      }
+    }
+  },
+  methods: {
+    // handleGetRecipes(){
+    //   this.$store.dispatch('getAllRecipes');
+    // }
+    fetchMore(){
+      this.page++;
+      this.$apollo.queries.Recipes.fetchMore({
+        variables: {
+          offset: (this.page * pageSize),
+          limit: pageSize
+        },
+        updateQuery: (existing, incoming) => {
+          const newRecipes = incoming.fetchMoreResult.Recipes;
+          if(this.totalRecipes.length > this.Recipes.length){
+            this.showMoreEnabled = true
+          }else{
+            this.showMoreEnabled = false
+          }
+          return {
+            Recipes: [
+              ...existing.Recipes,
+              ...newRecipes
+
+            ]
+          }
+          // Recipes: [...existing.Recipes, ...incoming.fetchMoreResult.Recipes]
+        },
+      })
+    }
+  },
+  created(){
+    // this.handleGetRecipes();
+  },
+  computed: {
+    ...mapGetters(['totalRecipes'])
   }
+
 }
 </script>

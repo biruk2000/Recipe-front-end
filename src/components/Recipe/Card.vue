@@ -4,24 +4,23 @@
     >
       <div class="mb-2">
         <img
-          src="../../assets/recipe2.jpg"
+          :src="recipe.RecipeImages[0].path"
           class="w-full h-40 sm:h-48 object-cover"
           alt=""
         />
       </div>
-      <div class="grid grid-cols-4 mx-1 gap-px shadow-sm rounded">
-        <div class="" v-for="(image, i) in 4" :key="i">
-          <img src="../../assets/recipe2.jpg" class="w-20 h-12 object-cover" />
+      <div v-if="recipe.RecipeImages.length > 1" class="grid grid-cols-4 mx-1 gap-px shadow-sm rounded">
+        <div class="" v-for="(image, i) in recipe.RecipeImages" :key="i">
+          <img :src="image.path" class="w-20 h-12 object-cover" />
         </div>
       </div>
       <div class="p-4">
         <div class="mb-1">
           <div class="font-bold text-xl mb-2 border-b border-gray-300">
-            Title
+            {{recipe.title}}
           </div>
           <p class="text-gray-700 text-base">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-            Voluptatibus quia, Nonea!...
+            {{getDescription(recipe.description)}}
           </p>
         </div>
         <div class="flex items-center text-sm text-gray-600">
@@ -115,9 +114,15 @@
 export default {
   components: {
   },
+  props: ['recipe'],
   data: () => ({
     rating: 3
   }),
+  methods: {
+    getDescription(description){
+      return description.length > 40? description.substring(0,45) + '...' : description
+    }
+  }
 }
 </script>
 

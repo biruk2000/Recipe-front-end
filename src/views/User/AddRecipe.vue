@@ -17,7 +17,7 @@
     </div>
     <div class="md:grid md:grid-cols-2 md:gap-4">
       <div class="mt-5 md:mt-0 md:col-span-2">
-        <form @submit.prevent="addRecipe" method="POST">
+        <VeeForm @submit="addRecipe" :validation-schema="schema" :initial-values="userData" method="POST">
           <div class="">
             <div class="px-4 py-5 bg-white sm:p-6">
               <div class="grid grid-cols-6 gap-6">
@@ -27,8 +27,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Title</label
                   >
-                  <input
+                  <VeeField
                     id="title"
+                    name="title"
                     type="text"
                     class="
                       mt-1
@@ -43,6 +44,7 @@
                     v-model="title"
                     placeholder="Enter Recipe Title"
                   />
+                  <ErrorMessage class="text-red-600" name="title" />
                 </div>
 
                 <div class="col-span-6 sm:col-span-3">
@@ -51,10 +53,11 @@
                     class="block text-sm font-medium text-gray-700"
                     >Category</label
                   >
-                  <select
+                  <VeeField
+                    name="category"
                     id="category"
+                    as="select"
                     v-model="category"
-                    autocomplete="category"
                     class="
                       mt-1
                       block
@@ -73,7 +76,8 @@
                     <option v-for="(category, i) in categories" :key="i">
                       {{ category }}
                     </option>
-                  </select>
+                  </VeeField>
+                  <ErrorMessage class="text-red-600" name="category" />
                 </div>
 
                 <div class="col-span-6">
@@ -82,8 +86,10 @@
                     class="block text-sm font-medium text-gray-700"
                     >Description</label
                   >
-                  <textarea
+                  <VeeField
                     id="description"
+                    name="description"
+                    as="textarea"
                     v-model="description"
                     class="
                       block
@@ -97,7 +103,8 @@
                     "
                     rows="3"
                     placeholder="Enter Description."
-                  ></textarea>
+                  ></VeeField>
+                  <ErrorMessage class="text-red-600" name="description" />
                 </div>
 
                 <div class="col-span-6 sm:col-span-1">
@@ -135,8 +142,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Preparation Time</label
                   >
-                  <input
+                  <VeeField
                     id="time"
+                    name="preparation time"
                     v-model="preparationTime"
                     type="number"
                     class="
@@ -151,6 +159,7 @@
                     "
                     placeholder="Enter Preparation Time"
                   />
+                  <ErrorMessage class="text-red-600" name="preparation time" />
                 </div>
                 <div class="col-span-6 sm:col-span-6">
                   <label
@@ -158,8 +167,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Number of Servant</label
                   >
-                  <input
+                  <VeeField
                     v-model="numberServant"
+                    name="servant"
                     id="servants"
                     type="number"
                     class="
@@ -173,6 +183,7 @@
                     "
                     placeholder="Enter Number of Servants"
                   />
+                  <ErrorMessage class="text-red-600" name="servant" />
                 </div>
 
                 <div
@@ -192,17 +203,17 @@
                         "
                       >
                         <th class="pl-4 py-3">#</th>
-                        <th class="px-4 py-3">Ingredient</th>
-                        <th class="px-4 py-3">Quantity</th>
-                        <th class="px-4 py-3">Comments</th>
+                        <th class="px-4 py-3">Ingredient Name</th>
+                        <th class="px-4 py-3">Amount</th>
+                        <th class="px-4 py-3">Measurement</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(ingredient, i) in ingredients" :key="i">
+                      <tr v-for="(ing, i) in ingredients" :key="i">
                         <td class="px-4 text-sm font-semibold">{{ i + 1 }}</td>
-                        <td class="px-4 py-3 text-sm">Name</td>
-                        <td class="px-4 py-3 text-sm">quantity</td>
-                        <td class="px-4 py-3 text-sm">comment</td>
+                        <td class="px-4 py-3 text-sm">{{ ing.name }}</td>
+                        <td class="px-4 py-3 text-sm">{{ ing.amount }}</td>
+                        <td class="px-4 py-3 text-sm">{{ ing.measurement }}</td>
                         <td class="py-3 text-sm">
                           <button type="button" @click="removeIngredient(i)">
                             <svg
@@ -231,8 +242,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Ingredient Name</label
                   >
-                  <input
+                  <VeeField
                     v-model="ingredient.name"
+                    name="ingredient name"
                     id="ingredient"
                     type="text"
                     class="
@@ -247,6 +259,7 @@
                     "
                     placeholder="Enter Ingredient Name"
                   />
+                  <ErrorMessage class="text-red-600" name="ingredient name" />
                 </div>
 
                 <div class="col-span-6 sm:col-span-1">
@@ -255,8 +268,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Ingredient Amount</label
                   >
-                  <input
+                  <VeeField
                     v-model="ingredient.amount"
+                    name="amount"
                     id="ingAmount"
                     step="0.5"
                     type="number"
@@ -272,6 +286,7 @@
                     "
                     placeholder="Enter Ingredient Amount"
                   />
+                  <ErrorMessage class="text-red-600" name="amount" />
                 </div>
 
                 <div class="col-span-6 sm:col-span-1">
@@ -347,9 +362,9 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(step, i) in steps" :key="i">
+                      <tr v-for="(st, i) in steps" :key="i">
                         <td class="px-4 text-sm font-semibold">{{ i + 1 }}</td>
-                        <td class="pl-4 py-3 text-sm">Step</td>
+                        <td class="pl-4 py-3 text-sm">{{ st.instruction }}</td>
                         <td class="py-3 text-sm">
                           <button type="button" @click="removeInstruction(i)">
                             <svg
@@ -378,8 +393,9 @@
                     class="block text-sm font-medium text-gray-700"
                     >Instruction Step</label
                   >
-                  <input
+                  <VeeField
                     type="text"
+                    name="step"
                     v-model="step.instruction"
                     class="
                       mt-1
@@ -393,6 +409,7 @@
                     "
                     placeholder="Enter Step"
                   />
+                  <ErrorMessage class="text-red-600" name="step" />
                 </div>
                 <div class="col-span-6 sm:col-span-1">
                   <button
@@ -516,12 +533,13 @@
                   duration-150
                 "
                 type="button"
+                @click="cancel"
               >
                 cancel
               </button>
             </div>
           </div>
-        </form>
+        </VeeForm>
       </div>
     </div>
   </div>
@@ -529,49 +547,10 @@
 
 <script>
 import { gql } from "@apollo/client/core";
-// const INSERT_RECIPE = gql`
-//   mutation (
-//     $title: String!
-//     $prepTime: String!
-//     $noServant: Int!
-//     $description: String!
-//     $category: String!
-//   ) {
-//     insert_Recipes_one(
-//       object: {
-//         title: $title
-//         prepTime: $prepTime
-//         noServant: $noServant
-//         description: $description
-//         categories: $category
-//       }
-//     ) {
-//       id
-//       title
-//       prepTime
-//       noServant
-//       description
-//       categories
-//     }
-//   }
-// `;
-const UPLOAD_RECIPE_IMAGE = gql`
-  mutation ($image: String!, $recipeId: Int!) {
-    uploadImage(image: $image, recipe_id: $recipeId) {
-      path
-    }
-  }
-`;
-
-const INSER_RECIPE_IMAGE = gql`
-  mutation($path: String!, $recipeId: Int!) {
-  insert_RecipeImages_one(object: {path: $path, recipe_id: $recipeId}) {
-    id
-    path
-    recipe_id
-  }
-}
-`;
+import { INSERT_RECIPE } from "../../queries/Recipes";
+import { INSERT_INGREDIENTS } from "../../queries/Ingredients";
+import { INSERT_STEPS } from "../../queries/Steps";
+import { UPLOAD_RECIPE_IMAGE, INSER_RECIPE_IMAGE } from "../../queries/Images";
 const GET_RECIPES = gql`
   query getAllRecipes {
     Recipes {
@@ -598,6 +577,7 @@ const GET_RECIPES = gql`
     }
   }
 `;
+import { mapGetters } from "vuex";
 export default {
   name: "add-recipe",
   apollo: {
@@ -607,6 +587,9 @@ export default {
   },
   created() {
     console.log(this.recipes);
+  },
+  computed: {
+    ...mapGetters(["user"]),
   },
   data() {
     return {
@@ -624,8 +607,8 @@ export default {
       step: {
         instruction: "",
       },
-      ingredients: [this.ingredient],
-      steps: [this.step],
+      ingredients: [],
+      steps: [],
       images: [],
       categories: [
         "General",
@@ -641,61 +624,120 @@ export default {
         "Burgers",
         "Chicken",
       ],
-      times: ["Hour", "Minute"],
+      times: ["Hr", "Min"],
       measurements: ["Kg", "g", "L", "ml", "Tea Spoon"],
+
+      // for validation
+      schema: {
+        title: "required|alpha",
+        category: "required",
+        description: "required|min:10|max:200",
+        "preparation time": "required",
+        servant: "required",
+        "ingredient name": "required",
+        amount: "required",
+        step: "required"
+      },
+      userData: {
+        category: "General",
+      },
     };
   },
 
   methods: {
     async addRecipe() {
       console.log("clicked");
+      const user = this.user;
+      console.log(user.id);
 
-      // const variables = {
-      //   title: "the third Recipe",
-      //   description: "this is the third recipe that will not be failed",
-      //   prepTime: "2hr",
-      //   noServant: 4,
-      //   category: "Gengeral",
-      // };
+      this.preparationTime = `${this.preparationTime} ${this.preparationTimeMeasurement}`;
 
-      // let recipe = await this.$apollo.mutate({
-      //   mutation: INSERT_RECIPE,
-      //   variables,
-      // });
-      // console.log(recipe);
-      for (let i = 0; i < this.images.length; i++) {
-        const variables = {
-          image: this.images[i],
-          recipeId: 4,
-        };
+      let variables = {
+        title: this.title,
+        description: this.description,
+        prepTime: this.preparationTime,
+        noServant: this.numberServant,
+        categories: this.category,
+        user_id: user.id,
+      };
 
-        let path = await this.$apollo.mutate({
-          mutation: UPLOAD_RECIPE_IMAGE,
-          variables,
-        });
-        if(path){
-          console.log(path);
-         const imageVariables = {
-            path: path.data.uploadImage.path,
-            recipeId: 4
-          }
-          let imageData = await this.$apollo.mutate({
-            mutation: INSER_RECIPE_IMAGE,
-            variables: imageVariables
+      let recipe = await this.$apollo.mutate({
+        mutation: INSERT_RECIPE,
+        variables,
+      });
+      console.log(recipe);
+      if (recipe.data.insert_Recipes_one) {
+        for (let i = 0; i < this.ingredients.length; i++) {
+          variables = {
+            recepi_id: recipe.data.insert_Recipes_one.id,
+            name: this.ingredients[i].name,
+            amount: this.ingredients[i].amount,
+            unit: this.ingredients[i].measurement,
+          };
+
+          let ingredient = await this.$apollo.mutate({
+            mutation: INSERT_INGREDIENTS,
+            variables,
           });
-          console.log("inserted image");
-          console.log(imageData)
+          console.log(ingredient.data.insert_Ingredients_one);
+        }
+
+        // insert instruction steps
+        for (let i = 0; i < this.steps.length; i++) {
+          variables = {
+            recipe_id: recipe.data.insert_Recipes_one.id,
+            step: this.steps[i].instruction,
+          };
+
+          let step = await this.$apollo.mutate({
+            mutation: INSERT_STEPS,
+            variables,
+          });
+          console.log(step.data.insert_Steps_one);
+        }
+
+        // inserting images
+        for (let i = 0; i < this.images.length; i++) {
+          const variables = {
+            image: this.images[i],
+            folder: "Images",
+          };
+
+          let path = await this.$apollo.mutate({
+            mutation: UPLOAD_RECIPE_IMAGE,
+            variables,
+          });
+          if (path) {
+            console.log(path);
+            const imageVariables = {
+              path: path.data.uploadImage.path,
+              recipeId: recipe.data.insert_Recipes_one.id,
+            };
+            let imageData = await this.$apollo.mutate({
+              mutation: INSER_RECIPE_IMAGE,
+              variables: imageVariables,
+            });
+            console.log("inserted image");
+            console.log(imageData);
+          }
         }
       }
     },
+
+    cancel() {},
+
     addIngredient() {
-      this.ingredients.push(this.ingredient);
+      let newIngredient = this.ingredient;
+      this.ingredients.push(newIngredient);
+      this.ingredient = {};
     },
     removeIngredient(index) {
       this.ingredients.splice(index, 1);
     },
     addInstruction() {
-      this.steps.push(this.step);
+      let newStep = this.step;
+      this.steps.push(newStep);
+      this.step = {};
     },
     removeInstruction(index) {
       this.steps.splice(index, 1);
