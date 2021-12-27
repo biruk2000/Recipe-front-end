@@ -28,10 +28,9 @@
               <span class="text-gray-700">Email</span>
               <VeeField
                 name="email"
-                :rules="isRequired"
                 type="text"
                 placeholder="Enter your email"
-                v-model="email"
+                v-model="item.email"
                 class="
                   mt-1
                   px-3
@@ -51,7 +50,7 @@
             <label for="" class="block mt-4 text-sm">
               <span class="text-gray-700">Password</span>
               <VeeField
-                v-model="password"
+                v-model="item.password"
                 name="password"
                 type="password"
                 placeholder="Enter Your password"
@@ -70,9 +69,6 @@
                 "
               />
               <ErrorMessage class="text-red-600" name="password" />
-            </label>
-            <label for="" class="block mt-4 text-sm">
-              <span>Field</span>
             </label>
             <button
               class="
@@ -136,33 +132,40 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {LOGIN} from '../../queries/User'
+import { useQuery } from '@vue/apollo-composable'
+import {ref,reactive} from 'vue'
+import {useStorage} from "@vueuse/core"
 
-export default {
-  name: "login",
-  components: {
-   
-  },
-  data() {
-    return {
-      email: "",
-      password: "",
-      schema: {
+     const item = reactive({})
+
+     const enabled = ref(false)
+     const schema = {
         email: 'required|email|min:4',
         password: 'required|min:4'
       }
-    };
-  },
-  methods: {
-    loginUser() {
-      this.$store.dispatch("loginUser", {
-        email: this.email,
-        password: this.password,
-      });
-    },
-    // isRequired(value) {
-    //   return value ? true : "This field is required";
-    // },
-  },
-};
+
+      const {onResult} = useQuery(LOGIN,item,()=>({
+        enabled
+      }))
+
+      onResult(({data})=> {
+        if(data && data.login && data.login.token){
+          console.log("incoming data",data.login.token)
+          let claims = data.login.token.split('.')[1]
+          let d = JSON.parse(window.atob(claims))
+          d['https://hasura.io/jwt/claims'].accessToken = data.login.token
+          console.log(d);
+          const state = useStorage("session",d['https://hasura.io/jwt/claims'])
+          console.log(state)
+          this.$router.push('/')
+        }
+      })
+
+      const loginUser = () => {
+        console.log("hello")
+        enabled.value = true
+      }
+
 </script>

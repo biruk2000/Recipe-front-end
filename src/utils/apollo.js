@@ -28,6 +28,7 @@ const authLink = setContext((_, { headers }) => {
     link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
     connectToDevTools: true,
+    assumeImmutableResults: false
   })
   
   // Create a provider

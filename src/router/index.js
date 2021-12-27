@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import AddRecipe from "../views/User/AddRecipe.vue"
 import Favorites from "../views/User/Favorites.vue"
 import Profile from "../views/User/Profile.vue"
+import Saved from "../views/User/Saved.vue"
 import Recipe from "../views/Recipes/Recipe.vue"
 
 import SignIn from '../views/Auth/SignIn.vue'
@@ -66,6 +67,17 @@ const routes = [
         path: "",
         name: "profile",
         component: Profile,
+      },
+    ],
+  },
+  {
+    path: "/saved",
+    component: MainLayout,
+    children: [
+      {
+        path: "",
+        name: "saved",
+        component: Saved,
       },
     ],
   },

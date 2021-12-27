@@ -2,18 +2,18 @@
     <div
       class="card max-w-lg overflow-hidden"
     >
-      <div class="mb-2">
+      <div class="mb-2" @click="gotoDetailsPage(recipe.id)">
         <img
-          :src="recipe.RecipeImages[0].path"
-          class="w-full h-40 sm:h-48 object-cover"
+          :src="currentImage"
+          class="w-full h-40 sm:h-52 object-cover"
           alt=""
         />
       </div>
-      <div v-if="recipe.RecipeImages.length > 1" class="grid grid-cols-4 mx-1 gap-px shadow-sm rounded">
-        <div class="" v-for="(image, i) in recipe.RecipeImages" :key="i">
-          <img :src="image.path" class="w-20 h-12 object-cover" />
+      <!-- <div v-if="recipe.RecipeImages.length > 1 && type" class="grid grid-cols-4 mx-1 gap-px shadow-sm rounded">
+        <div class="" v-for="(image, i) in recipe.RecipeImages" :key="i" @click="changeImage(i)">
+          <img :src="image.path" loading="lazy" class="w-20 h-12 object-cover" />
         </div>
-      </div>
+      </div> -->
       <div class="p-4">
         <div class="mb-1">
           <div class="font-bold text-xl mb-2 border-b border-gray-300">
@@ -116,18 +116,34 @@ export default {
   },
   props: ['recipe'],
   data: () => ({
-    rating: 3
+    rating: 3,
+    activeImage: 0
   }),
   methods: {
     getDescription(description){
       return description.length > 40? description.substring(0,45) + '...' : description
+    },
+    gotoDetailsPage(recipeId){
+      this.$router.push(`/recipes/${recipeId}`)
+    },
+    changeImage(imageIndex){
+      this.activeImage = imageIndex
+    }
+  },
+  created(){
+    console.log(this.type)
+    console.log(this.recipe)
+  },
+  computed:{
+    currentImage(){
+      return this.recipe.RecipeImages[this.activeImage].path
     }
   }
 }
 </script>
 
 
-<style lang="postcss">
+<style lang="postcss" scoped>
 .card {
   @apply bg-white rounded overflow-hidden shadow-lg hover:shadow-2xl relative;
 }

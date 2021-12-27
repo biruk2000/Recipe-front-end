@@ -9,7 +9,6 @@ export const GET_RECIPES = gql`
       noServant
       prepTime
       categories
-      likes
       Steps {
         id
         step
@@ -41,7 +40,6 @@ export const INFINITE_SCROLL_POST = gql`
       noServant
       prepTime
       categories
-      likes
       Steps {
         id
         step
@@ -59,6 +57,46 @@ export const INFINITE_SCROLL_POST = gql`
       RecipeImages {
         id
         path
+      }
+    }
+  }
+`;
+
+export const GET_RECIPE = gql`
+  query ($id: Int!) {
+    Recipes_by_pk(id: $id) {
+      id
+      title
+      description
+      noServant
+      prepTime
+      categories
+      Steps {
+        id
+        step
+      }
+      Ingredients {
+        id
+        name
+        amount
+        unit
+      }
+      RecipeImages {
+        id
+        path
+      }
+      Comments {
+        id
+        comment
+        date
+        User {
+          id
+          user_name
+        }
+      }
+      User {
+        id
+        user_name
       }
     }
   }
@@ -86,11 +124,24 @@ export const INSERT_RECIPE = gql`
       id
       title
       description
-      likes
       noServant
       prepTime
       categories
       user_id
+    }
+  }
+`;
+
+// recipe search by title
+export const SEARCH_RECIPES = gql`
+  query ($searchTerm: String!) {
+    Recipes(where: { _or: { title: { _eq: $searchTerm } } }) {
+      id
+      title
+      description
+      RecipeImages(limit: 1) {
+        path
+      }
     }
   }
 `;
