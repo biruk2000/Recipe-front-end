@@ -1,6 +1,5 @@
 import { createStore } from "vuex";
 
-import { SIGNUP, LOGIN } from "../queries/User.js";
 import { GET_RECIPES,SEARCH_RECIPES } from "../queries/Recipes.js";
 import {USER_FAVORITES_RECIPE_IDS} from '../queries/Favorites'
 import {USER_BOOKMARK_RECIPES_IDS} from '../queries/BookMarks'
@@ -17,7 +16,8 @@ export default createStore({
     searchResults: [],
     userFavoritesIds: [],
     userBookmarksIds: [],
-    userFavoritesRecipes: []
+    userFavoritesRecipes: [],
+    userBookmarkedRecipes: []
   },
   mutations: {
     setUser(state, payload){
@@ -39,6 +39,9 @@ export default createStore({
     setUserBookmarksIds(state, payload){
       state.userBookmarksIds = payload
     },
+    setUserBookmarkedRecipes(state, payload){
+      state.userBookmarkedRecipes.push(payload);
+    },
     setSearchResults(state, payload){
       if(payload !== null){
         state.searchResults = payload
@@ -49,52 +52,32 @@ export default createStore({
     }
   },
   actions: {
-    signupUser: ({commit}, payload) => {
-      apolloClient.mutate({
-        mutation: SIGNUP,
-        variables: payload
-      }).then(({data}) => {
-        console.log(data);
-        localStorage.setItem("token", data.Signup.token);
-        commit("setUser", data.Signup);
-        router.push('/');
-      })
-    },
-
-    loginUser: ({commit}, payload) => {
-      apolloClient.mutate({
-        mutation: LOGIN,
-        variables: payload
-      }).then(({data}) => {
-        console.log(data.login);
-        localStorage.setItem("token", data.login.token);
-        commit("setUser", data.login);
-        
-      })
-    },
-
-    getCurrentUser: () => {
-       
+    // eslint-disable-next-line no-unused-vars
+    setUser: ({commit}, payload) => {
+      commit("setUser", payload)
     },
 
     // eslint-disable-next-line no-unused-vars
     getUserFavoritesIds: ({commit}) => {
-      if(isLoggedIn){
+      if(isLoggedIn.value){
         apolloClient.mutate({
           mutation: USER_FAVORITES_RECIPE_IDS,
           variables: {
             userId: userId.value
           }
         }).then(({data}) => {
-          console.log(data.Favorites)
           commit('setUserFavoritesIds', data.Favorites);
         }).catch(err => console.error(err))
       }
     },
 
+    setUserBookmarkedRecipes : ({commit}, payload) => {
+      commit("setUserBookmarkedRecipes", payload)
+    },
+
     // eslint-disable-next-line no-unused-vars
     getUserBookmarksIds: ({commit}) => {
-      if(isLoggedIn){
+      if(isLoggedIn.value){
         apolloClient.mutate({
           mutation: USER_BOOKMARK_RECIPES_IDS,
           variables: {
@@ -115,7 +98,6 @@ export default createStore({
       apolloClient.query({
         query: GET_RECIPES
       }).then(({data}) => {
-        console.log(data.Recipes)
         commit("setRecipes", data.Recipes);
       })
     },
@@ -128,18 +110,25 @@ export default createStore({
       }).then(({data}) => {
         commit("setSearchResults", data.Recipes)
       }).catch(err => console.error(err))
+    },
+
+    clearUser: ({state}) => {
+      state.user  = null;
+      localStorage.removeItem("token");
+      
+      // this.$router.go(0)
+      // this.$$router.push('/')
+      router.go().catch(() => {})
     }
   },
   getters: {
     user: state => state.user,
-
-
-
     // recipes getters
     totalRecipes: state => state.recipes,
     searchResults: state => state.searchResults,
     userFavoritesIds: state => state.userFavoritesIds,
     userBookmarksIds: state => state.userBookmarksIds,
-    userFavoritesRecipes: state => state.userFavoritesRecipes
+    userFavoritesRecipes: state => state.userFavoritesRecipes,
+    userBookmardedRecipes: state => state.userBookmarkedRecipes
   }
 });

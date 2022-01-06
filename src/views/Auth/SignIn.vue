@@ -11,12 +11,12 @@
       shadow-xl
     "
   >
-    <div class="flex flex-col overflow-y-auto md:flex-row">
-      <div class="h-32 md:h-auto md:w-1/2">
+    <div class="flex flex-col overflow-y-auto md:h-96 md:flex-row">
+      <div class="h-32 md:h-full md:w-1/2">
         <img
           arial-hidden="true"
           class="object-cover w-full h-full"
-          src="../../assets/img/login-office.jpeg"
+          src="../../assets/img/login-food.jpg"
           alt="login image"
         />
       </div>
@@ -41,7 +41,7 @@
                   border
                   rounded
                   outline-none
-                  focus:outline-none focus:ring-2 focus:ring-blue-400
+                  focus:outline-none focus:ring-2 focus:ring-yellow-600
                   w-full
                 "
               />
@@ -64,7 +64,7 @@
                   border
                   rounded
                   outline-none
-                  focus:outline-none focus:ring-2 focus:ring-blue-400
+                  focus:outline-none focus:ring-2 focus:ring-yellow-600
                   w-full
                 "
               />
@@ -83,18 +83,19 @@
                 text-center text-white
                 transition-colors
                 duration-150
-                bg-blue-600
                 border-transparent
                 rounded-lg
-                hover:bg-blue-700
                 focus:outline-none focus:shadow-outline-blue
               "
+              :class="{'bg-gray-400' : loading, 'bg-red-600 hover:bg-red-700': !loading}"
+              :disabled="loading"
             >
               Log in
             </button>
+            
           </VeeForm>
           <hr class="my-8" />
-          <button
+          <!-- <button
             class="
               flex
               items-center
@@ -114,7 +115,7 @@
             "
           >
             Google
-          </button>
+          </button> -->
           <p class="mt-2">
             <span class="text-sm font-medium text-blue-600"
               >Dont't have an account?</span
@@ -133,39 +134,66 @@
 </template>
 
 <script setup>
-import {LOGIN} from '../../queries/User'
-import { useQuery } from '@vue/apollo-composable'
-import {ref,reactive} from 'vue'
-import {useStorage} from "@vueuse/core"
+import { LOGIN } from "../../queries/User";
+import { useQuery } from "@vue/apollo-composable";
+import { ref, reactive } from "vue";
+import { useToast } from "vue-toastification";
 
-     const item = reactive({})
+// eslint-disable-next-line no-unused-vars
+import { useStorage } from "@vueuse/core";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+// eslint-disable-next-line no-unused-vars
+import { set } from "../../utils/Auth/user";
 
-     const enabled = ref(false)
-     const schema = {
-        email: 'required|email|min:4',
-        password: 'required|min:4'
-      }
+const item = reactive({});
+// eslint-disable-next-line no-unused-vars
+const store = useStore();
 
-      const {onResult} = useQuery(LOGIN,item,()=>({
-        enabled
-      }))
+const toast = useToast();
+// eslint-disable-next-line no-unused-vars
+const router = useRouter();
 
-      onResult(({data})=> {
-        if(data && data.login && data.login.token){
-          console.log("incoming data",data.login.token)
-          let claims = data.login.token.split('.')[1]
-          let d = JSON.parse(window.atob(claims))
-          d['https://hasura.io/jwt/claims'].accessToken = data.login.token
-          console.log(d);
-          const state = useStorage("session",d['https://hasura.io/jwt/claims'])
-          console.log(state)
-          this.$router.push('/')
-        }
-      })
+const enabled = ref(false);
+const loading = ref(false);
+const errorMessage = ref('')
+const schema = {
+  email: "required|email|min:4",
+  password: "required|min:4",
+};
 
-      const loginUser = () => {
-        console.log("hello")
-        enabled.value = true
-      }
 
+
+const { onResult, onError } = useQuery(LOGIN, item, () => ({
+  enabled,
+}));
+
+onResult(({ data }) => {
+  if (data && data.login && data.login.token) {
+    loading.value = false;
+    let claims = data.login.token.split(".")[1];
+    let d = JSON.parse(window.atob(claims));
+    d["https://hasura.io/jwt/claims"].accessToken = data.login.token;
+    localStorage.removeItem("session");
+    localStorage.removeItem("token");
+    const state = useStorage("session", d["https://hasura.io/jwt/claims"]);
+    localStorage.setItem("token", data.login.token);
+    set(state.value);
+    store.dispatch("setUser", data.login);
+    // router.push("/");
+    location.replace("/")
+    toast.success("login successfully");
+  }
+});
+
+onError((error) => {
+  enabled.value = false;
+  loading.value = false;
+  errorMessage.value = error.message;
+  toast.error(`${errorMessage.value} Please try again.`);
+});
+const loginUser = () => {
+  loading.value = true;
+  enabled.value = true;
+};
 </script>

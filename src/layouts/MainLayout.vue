@@ -1,5 +1,8 @@
 <template>
-  <div class="flex h-screen bg-gray-100" :class="{'overflow-hidden': isSideMenuOpen}">
+  <div
+    class="flex h-screen bg-gray-100"
+    :class="{ 'overflow-hidden': isSideMenuOpen }"
+  >
     <SideMenu />
     <transition name="fade">
       <div
@@ -24,9 +27,13 @@
       <NavBar @toggle-side-menu="toggleSideMenu" />
       <main class="h-full overflow-y-auto">
         <div class="container px-6 mx-auto grid">
-          <transition name="main" mode="out-in">
-            <router-view></router-view>
-          </transition>
+          <router-view v-slot="{ Component, route }">
+            <transition>
+              <div :key="route.name">
+                <component :is="Component" />
+              </div>
+            </transition>
+          </router-view>
         </div>
       </main>
     </div>
@@ -68,7 +75,7 @@ export default {
 .main-enter-active,
 .main-leave-active {
   transition-property: opacity;
-  transition-duration: 0.25s;
+  transition-duration: 0.15s;
 }
 
 .main-enter-active {
