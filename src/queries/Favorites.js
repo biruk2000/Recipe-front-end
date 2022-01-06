@@ -25,21 +25,6 @@ export const REMOVE_FAVORITE = gql`
   }
 `;
 
-export const USER_FAVORITES = gql`
-  query ($userId: uuid!) {
-    Favorites(where: { user_id: { _eq: $userId } }) {
-      id
-      Recipe {
-        id
-        title
-        noServant
-        prepTime
-        description
-      }
-    }
-  }
-`;
-
 export const USER_FAVORITES_RECIPE_IDS = gql`
   query ($userId: uuid!) {
     Favorites(where: { user_id: { _eq: $userId } }) {

@@ -41,12 +41,12 @@
       </button>
       <!-- Search input -->
       <div class="flex justify-center flex-1 lg:mr-32">
-        <div class="relative w-full max-w-xl mr-6 focus-within:text-purple-500">
+        <div class="relative w-full max-w-xl mr-6 focus-within:text-yellow-500">
           <div class="absolute inset-y-0 flex items-center pl-2">
             <svg
               class="w-4 h-4"
               aria-hidden="true"
-              fill="currentColor"
+              fill="#f57a0f"
               viewBox="0 0 20 20"
             >
               <path
@@ -60,22 +60,17 @@
             class="
               w-full
               pl-8
+              py-3
               pr-2
               text-sm text-gray-700
               placeholder-gray-600
               bg-gray-100
               border-0
-              rounded-md
-              dark:placeholder-gray-500
-              dark:focus:shadow-outline-gray
-              dark:focus:placeholder-gray-600
-              dark:bg-gray-700
-              dark:text-gray-200
-              focus:placeholder-gray-500
+              rounded-full
+              focus:placeholder-gray-600
               focus:bg-white
-              focus:border-purple-300
+              focus:border-yellow-600
               focus:outline-none
-              focus:shadow-outline-purple
               form-input
             "
             type="text"
@@ -86,75 +81,67 @@
           />
         </div>
       </div>
-      <div v-if="searchResults.length"
+      <div
+        v-if="searchResults.length"
         class="
-          p-2
-          mt-10 w-3/4
+          pt-2
+          px-2
+          mt-12
+          w-3/4
           rounded
-          shadow-sm absolute z-10 top-6
-          bg-gray-500
+          shadow-sm
+          absolute
+          z-10
+          top-6
+          bg-white
         "
       >
-        <div @click="gotoDetailPage(result.id)" v-for="result in searchResults " :key="result.id">
-          <div class="flex
-          items-center space-x-4">
-            <div class="flex-shirik-0 ">
-              <img class="h-12 w-12 rounded-full" :src="result.RecipeImages[0].path" alt="" />
+        <div
+          @click="gotoDetailPage(result.id)"
+          v-for="result in searchResults"
+          :key="result.id"
+          class="my-1 border-b-2 border-gray-200 pb-2"
+        >
+          <div class="flex items-center space-x-4">
+            <div class="flex-shirik-0">
+              <img
+                class="h-12 w-12 rounded-full"
+                :src="result.RecipeImages[0].path"
+                alt=""
+              />
             </div>
             <div>
-              <div class="text-xl font-semibold text-white">{{result.title}}</div>
+              <div class="text-xl font-semibold text-black">
+                {{ result.title }}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <ul class="flex items-center flex-shrink-0 space-x-6">
         <!-- Notifications menu -->
-        <li class="relative">
+        <li v-if="!isUserLoggedIn">
           <button
             class="
-              relative
-              align-middle
-              rounded-md
-              focus:outline-none focus:shadow-outline-purple
+              border-blue-400
+              hover:text-white 
+              hover:bg-blue-600
+              border-2
+              text-black
+              rounded-lg
+              focus:outline-none
+              px-6
+              py-1
+              font-normal
+              shadow
             "
-            @click="toggleNotificationsMenu"
-            @keydown.escape="closeNotificationsMenu"
-            aria-label="Notifications"
-            aria-haspopup="true"
+            @click="gotoLogin"
           >
-            <svg
-              class="w-5 h-5"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"
-              ></path>
-            </svg>
-            <!-- Notification badge -->
-            <span
-              aria-hidden="true"
-              class="
-                absolute
-                top-0
-                right-0
-                inline-block
-                w-3
-                h-3
-                transform
-                translate-x-1
-                -translate-y-1
-                bg-red-600
-                border-2 border-white
-                rounded-full
-                dark:border-gray-800
-              "
-            ></span>
+            login
           </button>
         </li>
         <!-- Profile menu -->
-        <li class="relative">
+        <li class="relative" v-else>
           <button
             class="
               align-middle
@@ -207,7 +194,7 @@
                     hover:bg-gray-100 hover:text-gray-800
                     dark:hover:bg-gray-800 dark:hover:text-gray-200
                   "
-                 to="/profile"
+                  to="/profile"
                 >
                   <svg
                     class="w-4 h-4 mr-3"
@@ -227,7 +214,7 @@
                 </router-link>
               </li>
               <li class="flex">
-                <router-link
+                <button
                   class="
                     inline-flex
                     items-center
@@ -242,7 +229,7 @@
                     hover:bg-gray-100 hover:text-gray-800
                     dark:hover:bg-gray-800 dark:hover:text-gray-200
                   "
-                  to=""
+                  @click="handleSignout"
                 >
                   <svg
                     class="w-4 h-4 mr-3"
@@ -259,7 +246,7 @@
                     ></path>
                   </svg>
                   <span>Log out</span>
-                </router-link>
+                </button>
               </li>
             </ul>
           </template>
@@ -271,12 +258,14 @@
 
 <script>
 import { mapGetters } from "vuex";
+import {isLoggedIn, unset} from '../utils/Auth/user'
 export default {
   name: "navBar",
   data() {
     return {
       searchTerm: "",
-      isProfileMenuOpen: false
+      isProfileMenuOpen: false,
+      isUserLoggedIn: isLoggedIn.value
     };
   },
   methods: {
@@ -284,21 +273,35 @@ export default {
       this.$emit("toggle-side-menu");
     },
     handleSearchRecipes() {
-      this.$store.dispatch("searchRecipes", {
-        searchTerm: this.searchTerm,
-      });
+      if(this.searchTerm){
+        this.$store.dispatch("searchRecipes", {
+          searchTerm: this.searchTerm,
+        });
+      }else {
+        this.searchTerm=''
+      }
+
     },
-    gotoDetailPage(recipeId){
-      this.searchTerm = ''
-      this.$router.push(`/recipes/${recipeId}`)
-      this.$store.commit('clearSearchResult');
+    gotoDetailPage(recipeId) {
+      this.searchTerm = "";
+      this.$router.push(`/recipes/${recipeId}`);
+      this.$store.commit("clearSearchResult");
     },
-    toggleProfileMenu(){
-      this.isProfileMenuOpen = !this.isProfileMenuOpen
+    toggleProfileMenu() {
+      this.isProfileMenuOpen = !this.isProfileMenuOpen;
+    },
+
+    handleSignout(){
+      unset();
+      this.$store.dispatch("clearUser");
+      
+    },
+    gotoLogin(){
+      this.$router.push('/user/signin')
     }
   },
   computed: {
-    ...mapGetters(["searchResults"]),
+    ...mapGetters(["searchResults","user"]),
   },
 };
 </script>

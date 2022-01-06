@@ -1,44 +1,32 @@
 <template>
-  <div class="container mx-auto px-6 mb-8">
-    <div class="flex mx-4 my-4 justify-between">
-      <h4 class="font-bold mt-12 border-b border-gray-200">Recipes</h4>
-      <select
-        class="
-          mt-12
-          focus:ring-blue-500 focus:border-blue-500
-          border
-          h-10
-          pl-2
-          pr-7
-          text-gray-500
-          sm:text-sm
-          rounded-md
-        "
-      >
-        <option>USD</option>
-        <option>CAD</option>
-        <option>EUR</option>
-      </select>
-    </div>
-    <div class="grid lg:grid-cols-3 gap-10">
-      <div v-for="recipe in Recipes" :key="recipe.id">
-        <Card :recipe="recipe"></Card>
+  <div class="container mb-8">
+    <div class="flex w-full my-4 p-4 items-center bg-white justify-between">
+      <div class="">
+        <h4 class="font-bold text-2xl  border-b border-gray-200 mb-4">All Recipes</h4>
+        <router-link class="border-b-4 mt-5 pb-1 border-yellow-600" to="/recipes/filter">Filter Recipes here</router-link>
+      </div>
+      <div class="align-center text-center">
+        <p class="text-gray-600 font-bold font-sans">Showing {{Recipes.length}} of 8 results</p>
       </div>
     </div>
-    <div class="mx-auto container mt-5" v-if="showMoreEnabled">
-      <button @click="fetchMore" class="py-5 text-white bg-blue-600">
-        Fech more
-      </button>
+    <div class="mx-auto px-6">
+      <div class="grid lg:grid-cols-3 gap-10">
+        <div v-for="recipe in Recipes" :key="recipe.id">
+          <Card :recipe="recipe" :show="true"></Card>
+        </div>
+      </div>
     </div>
   </div>
+  <div v-observe-visibility="fetchMore"></div>
 </template>
 
 <script>
 // @ is an alias to /src
 import { INFINITE_SCROLL_POST } from "../queries/Recipes";
 import Card from "../components/Recipe/Card.vue";
-import { mapGetters } from "vuex";
-const pageSize = 3;
+
+import { useToast } from "vue-toastification";
+const pageSize = 6;
 
 export default {
   name: "Home",
@@ -46,7 +34,6 @@ export default {
     return {
       Recipes: [],
       page: 0,
-      showMoreEnabled: true,
       // totalRecipes: this.totalRecipes.length
     };
   },
@@ -63,10 +50,7 @@ export default {
     },
   },
   methods: {
-    // handleGetRecipes(){
-    //   this.$store.dispatch('getAllRecipes');
-    // }
-    fetchMore() {
+    fetchMore() { 
       this.page++;
       this.$apollo.queries.Recipes.fetchMore({
         variables: {
@@ -75,24 +59,20 @@ export default {
         },
         updateQuery: (existing, incoming) => {
           const newRecipes = incoming.fetchMoreResult.Recipes;
-          if (this.totalRecipes.length > this.Recipes.length) {
-            this.showMoreEnabled = true;
-          } else {
-            this.showMoreEnabled = false;
-          }
           return {
-            Recipes: [...existing.Recipes, ...newRecipes],
+            Recipes: [
+              ...existing.Recipes, ...newRecipes],
           };
-          // Recipes: [...existing.Recipes, ...incoming.fetchMoreResult.Recipes]
+          
         },
       });
     },
-  },
-  created() {
-    // this.handleGetRecipes();
-  },
-  computed: {
-    ...mapGetters(["totalRecipes"]),
+  }, 
+  setup() {
+    const toast = useToast();
+
+    // Make it available inside methods
+    return { toast };
   },
 };
 </script>

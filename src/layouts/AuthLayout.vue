@@ -1,8 +1,8 @@
 <template>
   <div class="flex items-center min-h-screen p-6 bg-gray-50">
-    <transition name="fade">
-      <router-view />
-    </transition>
+    <router-view v-slot="{ Component }">
+      <component :is="Component" />
+    </router-view>
   </div>
 </template>
 

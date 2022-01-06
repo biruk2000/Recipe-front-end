@@ -2,8 +2,11 @@
   <div class="container pr-30 mt-3 p-10 bg-white" v-if="Recipes_by_pk">
     <div class="lg:flex justify-between items-center">
       <div class="flex space-x-4">
-        <p class="font-bold text-5xl">{{Recipes_by_pk.title}}</p>
-        <button class="text-grey-darker hover:text-red-dark mt-2" @click="handleToggleFavorite">
+        <p class="font-bold text-5xl">{{ Recipes_by_pk.title }}</p>
+        <button
+          class="text-grey-darker hover:text-red-dark mt-2"
+          @click="handleToggleFavorite"
+        >
           <!-- <svg xmlns="http://www.w3.org/2000/svg" class="hover:fill-current text-red-700" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg> -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -11,7 +14,9 @@
             height="40px"
             viewBox="0 0 24 24"
             width="40px"
-            :fill="[checkIfRecipeLiked(Recipes_by_pk.id, 'favorite')? 'red': 'gray']"
+            :fill="[
+              checkIfRecipeLiked(Recipes_by_pk.id, 'favorite') ? 'red' : 'gray',
+            ]"
           >
             <path d="M0 0h24v24H0V0z" fill="none" />
             <path
@@ -26,14 +31,18 @@
             class="hover:fill-current hover:text-blue-600"
             viewBox="0 0 24 24"
             width="30px"
-            :fill="[checkIfRecipeLiked(Recipes_by_pk.id, 'bookmark')? '#004aeb' : '#ccc']"
+            :fill="[
+              checkIfRecipeLiked(Recipes_by_pk.id, 'bookmark')
+                ? '#004aeb'
+                : '#ccc',
+            ]"
           >
             <path d="M0 0h24v24H0V0z" fill="none" />
             <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
           </svg>
         </button>
       </div>
-      <div class="flex space-x-2 mt-4">
+      <div class="flex space-x-2 mt-4" v-if="Recipes_by_pk.User.id === usId">
         <button
           class="
             bg-red-500
@@ -46,7 +55,7 @@
             font-semibold
             shadow
           "
-          @click="deleteRecipe"
+          @click="checkPermission"
         >
           Delete
         </button>
@@ -62,19 +71,37 @@
             font-semibold
             shadow
           "
+          @click="editRecipe"
         >
           Edit
         </button>
       </div>
     </div>
     <div class="flex divide-x divide-gray-600 mt-5">
-      <star-rating :value="ratingValue"></star-rating>
-      <p class="border-gray-500 px-4">{{Recipes_by_pk.Comments.length}} Reviews</p>
-      <div class="px-4">{{Recipes_by_pk.noServant}} servants</div>
+      <!-- <star-rating :value="ratingValue" @click="openRateModal"></star-rating> -->
+      <div class="flex mr-2">
+        <button type="button" v-for="i in 5" @click="openRateModal" :key="i">
+          <svg
+            class="block h-4 w-4"
+            :class="[getRatingValue >= i ? 'text-red-600' : 'text-gray-500']"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+            />
+          </svg>
+        </button>
+      </div>
+      <p class="border-gray-500 px-4">
+        {{ Recipes_by_pk.Comments.length }} Reviews
+      </p>
+      <div class="px-4">{{ Recipes_by_pk.noServant }} servants</div>
     </div>
 
     <p class="mt-4 text-black text-base md:w-10/12">
-      {{Recipes_by_pk.description}}
+      {{ Recipes_by_pk.description }}
     </p>
     <div class="flex space-x-2 items-center justify-between mt-6">
       <span
@@ -96,10 +123,12 @@
         <img
           class="rounded-full w-11 h-11 max-w-none"
           alt="A"
-          src="https://mdbootstrap.com/img/Photos/Avatars/avatar-6.jpg"
+          :src="Recipes_by_pk.User.path ? Recipes_by_pk.User.path : 'https://avatars.dicebear.com/v2/initials/john-doe.svg'"
         />
         <span class="text-gray-800 items-center flex ml-3">By -</span>
-        <span class="flex text-black items-center px-3 py-2"> {{Recipes_by_pk.User.user_name}} </span>
+        <span class="flex text-black items-center px-3 py-2">
+          {{ Recipes_by_pk.User.user_name }}
+        </span>
       </span>
     </div>
     <div class="md:mx-10 divide-y-2 divide-gray-600">
@@ -125,7 +154,12 @@
             />
           </div>
           <div class="grid grid-cols-4 md:mx-1 gap-0 shadow-sm rounded">
-            <div class="p-1 md:p-0" v-for="(image, i) in Recipes_by_pk.RecipeImages" :key="i" @click="changeImage(i)">
+            <div
+              class="p-1 md:p-0"
+              v-for="(image, i) in Recipes_by_pk.RecipeImages"
+              :key="i"
+              @click="changeImage(i)"
+            >
               <img
                 :src="image.path"
                 class="w-12 h-10 md:w-20 md:h-12 object-cover"
@@ -136,11 +170,12 @@
         <div class="ml-8 border-2 border-gray-300 w-60">
           <div class="p-5">
             <p class="mb-3">
-              <span class="font-semibold text-gray-700 pr-1">Prep:</span>{{Recipes_by_pk.prepTime}}
+              <span class="font-semibold text-gray-700 pr-1">Prep:</span
+              >{{ Recipes_by_pk.prepTime }}
             </p>
             <p>
               <span class="font-semibold text-gray-700 pr-1">Category:</span
-              >{{Recipes_by_pk.categories}}
+              >{{ Recipes_by_pk.categories }}
             </p>
           </div>
         </div>
@@ -149,9 +184,13 @@
         <p class="font-bold text-3xl">Ingredients</p>
         <div class="mt-10 mx-2">
           <ul>
-            <li v-for="(ingredient, i) in Recipes_by_pk.Ingredients" :key="i" class="mb-6">
-              <span class="font-bold">{{ i+1 }}</span>
-              <p class="inline-block mx-4">{{ingredient.name}}</p>
+            <li
+              v-for="(ingredient, i) in Recipes_by_pk.Ingredients"
+              :key="i"
+              class="mb-6"
+            >
+              <span class="font-bold">{{ i + 1 }}</span>
+              <p class="inline-block mx-4">{{ ingredient.name }}</p>
             </li>
           </ul>
         </div>
@@ -160,10 +199,14 @@
         <p class="font-bold text-3xl">Steps</p>
         <div class="mt-10 mx-2">
           <ul class="mx-1">
-            <li v-for="(step,i) in Recipes_by_pk.Steps" :key="i" class="mb-6 md:w-4/5">
-              <p class="font-bold mb-4">Step {{ i+1 }}</p>
+            <li
+              v-for="(step, i) in Recipes_by_pk.Steps"
+              :key="i"
+              class="mb-6 md:w-4/5"
+            >
+              <p class="font-bold mb-4">Step {{ i + 1 }}</p>
               <p>
-                {{step.step}}
+                {{ step.step }}
               </p>
             </li>
           </ul>
@@ -171,7 +214,7 @@
       </div>
       <div class="mt-10 pt-5">
         <div>
-          <form class="w-full" @submit.prevent="handleAddRecipeReview">
+          <VeeForm class="w-full" @submit="handleAddRecipeReview" :validation-schema="schema">
             <div class="flex items-center py-2">
               <p
                 class="
@@ -200,7 +243,8 @@
                   />
                 </svg>
               </p>
-              <input
+              <VeeField
+                name="comment"
                 class="
                   appearance-none
                   focus:border-blue-700
@@ -217,6 +261,7 @@
                 placeholder="Add Review"
                 v-model="reviewMessage"
               />
+              
               <button
                 class="
                   flex-shrink-0
@@ -275,235 +320,503 @@
                 </svg>
               </button>
             </div>
-          </form>
+            <ErrorMessage class="text-red-600 ml-2" name="comment" />
+          </VeeForm>
         </div>
-        <div class="mt-6 bg-gray-300" v-if="Recipes_by_pk.Comments">
+
+        <div class="mt-6" v-if="Recipes_by_pk.Comments">
           <div class="border-b border-teal-500 p-3">
-            <p class="font-semibold text-xl">Reviews({{Recipes_by_pk.Comments.length}})</p>
+            <p class="font-semibold text-xl">
+              Reviews({{ Recipes_by_pk.Comments.length }})
+            </p>
           </div>
-          <div class="flex items-center p-4" v-for="(comment,i) in Recipes_by_pk.Comments" :key="i">
-            <img
-              class="w-10 h-10 rounded-full mr-4"
-              src="../../assets/logo.png"
-              alt="Avatar of Jonathan Reinink"
-            />
-            <div class="text-sm">
-              <p class="leading-none text-black font-semibold">
-                {{comment.User.user_name}}
-              </p>
-              <p class="p-2">
-                {{comment.comment}}.
-              </p>
-              <p class="text-gray-600 p-2">{{comment.date}}</p>
+          <div
+            class="
+              p-4
+              mt-3
+              rounded-md
+              shadow-md
+              flex
+              items-center
+              mx-auto
+              bg-gray-100
+              space-x-4
+            "
+            v-for="(comment, i) in Recipes_by_pk.Comments"
+            :key="i"
+          >
+            <div class="flex-shirik-0">
+              <img class="h-12 w-12" src="../../assets/logo.png" alt="" />
+            </div>
+            <div>
+              <div class="text-xl font-medium text-black">
+                {{ comment.User.user_name }}
+              </div>
+              <p class="text-gray-500">{{ comment.comment }}.</p>
+              <p class="text-gray-400 p-2">{{ comment.date }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  <!-- dialog for rating -->
+  <Dialog :showModal="isRateDialogOpen">
+    <template v-slot:title>
+      <h3 class="font-semibold">Give Rate</h3>
+    </template>
+    <template v-slot:main>
+      <button type="button" v-for="i in 5" @click="getRate(i)" :key="i">
+        <svg
+          class="block h-6 w-6"
+          :class="[ratingValue >= i ? 'text-red-600' : 'text-gray-500']"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+          />
+        </svg>
+      </button>
+    </template>
+    <template v-slot:action>
+      <button
+        class="
+          text-green-500
+          background-transparent
+          font-bold
+          px-4
+          py-2
+          text-sm
+          outline-none
+          focus:outline-none
+          mr-1
+          mb-1
+          ease-linear
+          transition-all
+          duration-150
+        "
+        type="button"
+        v-on:click="saveRating"
+      >
+        Rate
+      </button>
+      <button
+        class="
+          text-red-500
+          bg-transparent
+          border border-solid border-red-500
+          hover:bg-red-500 hover:text-white
+          active:bg-red-600
+          font-bold
+          text-sm
+          px-4
+          py-2
+          rounded
+          outline-none
+          focus:outline-none
+          mr-1
+          mb-1
+          ease-linear
+          transition-all
+          duration-150
+        "
+        type="button"
+        v-on:click="cancel('rating')"
+      >
+        Cancel
+      </button>
+    </template>
+  </Dialog>
+
+  <!-- dialog for delete permision -->
+  <Dialog :showModal="showDeleteDialog">
+    <template v-slot:title>
+      <h3 class="font-semibold">Delete</h3>
+    </template>
+    <template v-slot:main>
+      <p>Are you sure to delete?</p>
+    </template>
+    <template v-slot:action>
+      <button
+        class="
+          text-green-500
+          background-transparent
+          font-bold
+          px-4
+          py-2
+          text-sm
+          outline-none
+          focus:outline-none
+          mr-1
+          mb-1
+          ease-linear
+          transition-all
+          duration-150
+        "
+        type="button"
+        v-on:click="deleteRecipe"
+      >
+        yes
+      </button>
+      <button
+        class="
+          text-red-500
+          bg-transparent
+          border border-solid border-red-500
+          hover:bg-red-500 hover:text-white
+          active:bg-red-600
+          font-bold
+          text-sm
+          px-4
+          py-2
+          rounded
+          outline-none
+          focus:outline-none
+          mr-1
+          mb-1
+          ease-linear
+          transition-all
+          duration-150
+        "
+        type="button"
+        v-on:click="cancel('delete')"
+      >
+        Cancel
+      </button>
+    </template>
+  </Dialog>
 </template>
 
 <script>
 import StarRating from "../../components/Recipe/StarRating.vue";
+import Dialog from "../../components/Recipe/CommonModal.vue";
 import { mapGetters } from "vuex";
-import { GET_RECIPE } from '../../queries/Recipes';
-import {ADD_COMMENT} from '../../queries/Comments'
-import {ADD_FAVORITE, REMOVE_FAVORITE} from '../../queries/Favorites'
-import {ADD_TO_BOOKMARK,REMOVE_FROM_BOOKMARK} from '../../queries/BookMarks'
-// import {USER_FAVORITES} from '../../queries/Favorites'
+// eslint-disable-next-line no-unused-vars
+import { GET_RECIPE, DELETE_RECIPE } from "../../queries/Recipes";
+import { ADD_COMMENT } from "../../queries/Comments";
+import { ADD_FAVORITE, REMOVE_FAVORITE } from "../../queries/Favorites";
+import { ADD_TO_BOOKMARK, REMOVE_FROM_BOOKMARK } from "../../queries/BookMarks";
+// eslint-disable-next-line no-unused-vars
+import { UPATE_RATING, INSERT_RATING } from "../../queries/Rating";
 
-import {userId} from '../../utils/Auth/user'
+import { userId } from "../../utils/Auth/user";
+import { useToast } from "vue-toastification";
 export default {
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     StarRating,
+    Dialog,
   },
   props: ["recipeId"],
   data() {
     return {
-      ratingValue: 3,
+      ratingValue: 0,
+      isRateDialogOpen: false,
       reviewMessage: "",
       activeImage: 0,
       isRecipeLiked: false,
-      isRecipeMarked: false
+      isRecipeMarked: false,
+      usId: userId.value,
+      showDeleteDialog: false,
+      schema: {
+        comment: "required"
+      }
     };
   },
   apollo: {
     Recipes_by_pk: {
       query: GET_RECIPE,
-      variables(){
+      variables() {
         return {
-          id: this.recipeId
-        }
-      }
-    }
+          id: this.recipeId,
+        };
+      },
+    },
   },
   methods: {
+    saveRating() {
+      if (this.Recipes_by_pk.Rating != null) {
+        let prevTotalValue = this.Recipes_by_pk.Rating.totalValue;
+        let totalPrevUsers = this.Recipes_by_pk.Rating.totalUser;
+        let ratingValue =
+        prevTotalValue + this.ratingValue / totalPrevUsers + 1;
+        
+
+        this.$apollo
+          .mutate({
+            mutation: UPATE_RATING,
+            variables: {
+              recipeId: this.recipeId,
+              ratingValue: ratingValue,
+              totalValue: this.ratingValue,
+              totalUser: 1,
+            },
+          })
+          .then(() => {
+            this.isRateDialogOpen = false;
+            this.toast.success("Successfully rate this recipe!");
+          });
+      } else if (this.Recipes_by_pk.Rating == null) {
+        this.$apollo
+          .mutate({
+            mutation: INSERT_RATING,
+            variables: {
+              recipeId: this.recipeId,
+              ratingValue: this.ratingValue,
+              totalValue: this.ratingValue,
+              totalUser: 1,
+            },
+          })
+          // eslint-disable-next-line no-unused-vars
+          .then(({ data }) => {
+            this.isRateDialogOpen = false;
+            this.toast.success("Successfully rate this recipe!");
+          });
+      }
+    },
+    checkPermission() {
+      this.showDeleteDialog = true;
+    },
+    cancel(type) {
+      if (type === "delete") {
+        this.showDeleteDialog = false;
+      } else if (type === "rating") {
+        this.isRateDialogOpen = false;
+      }
+    },
     deleteRecipe() {
-      console.log("user");
+      this.$apollo
+        .mutate({
+          mutation: DELETE_RECIPE,
+          variables: {
+            recipeId: this.recipeId,
+          },
+        })
+        // eslint-disable-next-line no-unused-vars
+        .then(({ data }) => {
+          this.showDeleteDialog = false;
+          this.toast.success("Successfully deleted!")
+          this.$router.go(-1);
+        })
+        .catch(() => {
+          this.toast.error("try Again?");
+          this.showDeleteDialog = false;
+        });
     },
-    changeImage(imageIndex){
-      this.activeImage = imageIndex
+    changeImage(imageIndex) {
+      this.activeImage = imageIndex;
     },
-    clearComment(){
-      this.reviewMessage = ''
+    clearComment() {
+      this.reviewMessage = "";
     },
 
-    AddToFavorite(){
-      console.log(this.recipeId);
+    AddToFavorite() {
       let variables = {
         recipe_id: this.recipeId,
-        user_id: userId.value
-      }
-      this.$apollo.mutate({
-        mutation: ADD_FAVORITE,
-        variables,
-      }).then(({data}) => {
-        console.log(data.insert_Favorites_one)
-        const updatedUserFavoritesIds = [...this.userFavoritesIds, data.insert_Favorites_one];
-        this.$store.commit("setUserFavoritesIds", updatedUserFavoritesIds);
-        // this.$store.dispatch("set")
-      }).catch(err => console.error(err));
+        user_id: userId.value,
+      };
+      this.$apollo
+        .mutate({
+          mutation: ADD_FAVORITE,
+          variables,
+        })
+        .then(({ data }) => {
+          const updatedUserFavoritesIds = [
+            ...this.userFavoritesIds,
+            data.insert_Favorites_one,
+          ];
+          this.$store.commit("setUserFavoritesIds", updatedUserFavoritesIds);
+          // this.$store.dispatch("set")
+          this.toast.success("Sucessfully added to your favorites.");
+        })
+        .catch((err) => console.error(err));
     },
 
-    removeFavorite(){
+    removeFavorite() {
       this.isRecipeLiked = false;
       let variables = {
         recipe_id: this.recipeId,
-        user_id: userId.value
-      }
-      this.$apollo.mutate({
-        mutation: REMOVE_FAVORITE,
-        variables
-      }).then(({data}) => {
-        const removedRecipe = data.delete_Favorites.returning[0].recipe_id
-        const updatedUserFavoritesIds = this.userFavoritesIds.filter(fav => fav.recipe_id != removedRecipe);
-        this.$store.commit("setUserFavoritesIds", updatedUserFavoritesIds)
-      }).catch(err => console.error(err))
+        user_id: userId.value,
+      };
+      this.$apollo
+        .mutate({
+          mutation: REMOVE_FAVORITE,
+          variables,
+        })
+        .then(({ data }) => {
+          const removedRecipeId = data.delete_Favorites.returning[0].recipe_id;
+          const updatedUserFavoritesIds = this.userFavoritesIds.filter(
+            (fav) => fav.recipe_id != removedRecipeId
+          );
+          this.$store.commit("setUserFavoritesIds", updatedUserFavoritesIds);
+          this.toast.success("Sucessfully removed from your favorites.");
+        })
+        .catch((err) => console.error(err));
     },
 
-    handleToggleFavorite(){
-      if(this.isRecipeLiked){
-        this.removeFavorite()
-      }else{
-        this.AddToFavorite()
+    handleToggleFavorite() {
+      if (this.isRecipeLiked) {
+        this.removeFavorite();
+      } else {
+        this.AddToFavorite();
       }
     },
 
-
-    addToBookMark(){
-      let variables = {
-         recipe_id: this.recipeId,
-         user_id: userId.value
-      }
-
-      this.$apollo.mutate({
-        mutation: ADD_TO_BOOKMARK,
-        variables
-      }).then(({data}) => {
-        const updatedUserBookmarksIds = [...this.userBookmarksIds, data.insert_BookMarks_one];
-        this.$store.commit("setUserBookmarksIds", updatedUserBookmarksIds)
-      }).catch(err => console.error(err));
-
-    },
-
-    removeFromBookMark(){
+    addToBookMark() {
       let variables = {
         recipe_id: this.recipeId,
-        user_id: userId.value
-      }
-      this.$apollo.mutate({
-        mutation: REMOVE_FROM_BOOKMARK,
-        variables
-      }).then(({data}) => {
-        const removedRecipe = data.delete_BookMarks.returning[0].recipe_id;
-        const updatedUserBookmarksIds = this.userBookmarksIds.filter(bookmark => bookmark.recipe_id != removedRecipe);
-        this.$store.commit("setUserBookmarksIds", updatedUserBookmarksIds)
-      }).catch(err => console.error(err))
+        user_id: userId.value,
+      };
+
+      this.$apollo
+        .mutate({
+          mutation: ADD_TO_BOOKMARK,
+          variables,
+        })
+        .then(({ data }) => {
+          const updatedUserBookmarksIds = [
+            ...JSON.parse(JSON.stringify(this.userBookmarksIds)),
+            data.insert_BookMarks_one,
+          ];
+          this.$store.commit("setUserBookmarksIds", updatedUserBookmarksIds);
+          this.toast.success("Sucessfully added to your bookmarks.");
+        })
+        .catch((err) => console.error(err));
     },
 
-    handleToggleBookmark(){
-      if(this.isRecipeMarked){
-        this.removeFromBookMark()
-      }else{
+    removeFromBookMark() {
+      let variables = {
+        recipe_id: this.recipeId,
+        user_id: userId.value,
+      };
+      this.$apollo
+        .mutate({
+          mutation: REMOVE_FROM_BOOKMARK,
+          variables,
+        })
+        .then(({ data }) => {
+          const removedRecipe = data.delete_BookMarks.returning[0].recipe_id;
+          const updatedUserBookmarksIds = this.userBookmarksIds.filter(
+            (bookmark) => bookmark.recipe_id != removedRecipe
+          );
+          this.$store.commit("setUserBookmarksIds", updatedUserBookmarksIds);
+          this.toast.success("Sucessfully removed from your bookmarks.");
+        })
+        .catch((err) => console.error(err));
+    },
+
+    handleToggleBookmark() {
+      if (this.isRecipeMarked) {
+        this.removeFromBookMark();
+      } else {
         this.addToBookMark();
       }
-    },  
-
-    handleAddRecipeReview(){
-      const variables = {
-         comment: this.reviewMessage,
-         user_id: userId.value,
-         recipe_id: this.recipeId
-      }
-
-      this.$apollo.mutate({
-        mutation: ADD_COMMENT,
-        variables,
-        update: (cache, {data:{insert_Comments_one}}) => {
-          const data = cache.readQuery({
-              query: GET_RECIPE,
-              variables: {
-                id: this.recipeId
-              }
-          });
-
-          data.Recipes_by_pk.Comments.unshift(insert_Comments_one);
-          console.log(data.Recipes_by_pk)
-          // console.log("this is first data",{...data})
-          // let newData = {...data}
-          // console.log("this is second data",{...newData.Recipes_by_pk})
-          // let temp1 = {...newData}
-          // let newComments = [...newData.Recipes_by_pk.Comments, insert_Comments_one]
-          // let temp2 = newComments
-          // console.log("temp1", temp1);
-          // console.log("temp2", temp2)
-          // temp1.Comments = temp2
-          // console.log("reuslt", temp1)
-          // console.log("new comments",newComments)
-          // newData.Recipes_by_pk.Comments = [...newComments]
-          // console.log(newData);
-          // data.Recipes_by_pk.Comments = newComments
-          // cache.writeQuery({
-          //   query: GET_RECIPE,
-          //   data: {
-          //     // Recipes_by_pk: {...newData}
-          //   }
-          // })
-        }
-      // eslint-disable-next-line no-empty-pattern
-      }).then(({data})=> {
-        console.log(data.insert_Comments_one)
-        // this.reviewMessage = ''
-      }).catch(err => console.log(err));
     },
 
-    checkIfRecipeLiked(recipeId, type){
-      if(type === 'favorite'){
-        if(this.userFavoritesIds && this.userFavoritesIds.some(fav => fav.recipe_id === recipeId)){
+    handleAddRecipeReview() {
+      const variables = {
+        comment: this.reviewMessage,
+        user_id: userId.value,
+        recipe_id: this.recipeId,
+      };
+
+      this.$apollo
+        .mutate({
+          mutation: ADD_COMMENT,
+          variables,
+          // eslint-disable-next-line no-unused-vars
+          update: (cache, { data: { insert_Comments_one } }) => {
+            const data = cache.readQuery({
+              query: GET_RECIPE,
+              variables: {
+                id: this.recipeId,
+              },
+            });
+            let newObj = { ...data.Recipes_by_pk };
+
+            newObj.Comments = [insert_Comments_one, ...newObj.Comments];
+
+            cache.writeQuery({
+              query: GET_RECIPE,
+              data: {
+                Recipes_by_pk: {
+                  ...newObj,
+                },
+              },
+            });
+          },
+        })
+        .then(() => {
+          this.reviewMessage = ''
+        })
+        .catch((err) => console.log(err));
+    },
+    getRate(i) {
+      this.ratingValue = i;
+    },
+    openRateModal() {
+      this.isRateDialogOpen = true;
+    },
+
+    editRecipe() {
+      this.$router.push(`/editrecipe/${this.recipeId}`);
+    },
+
+    checkIfRecipeLiked(recipeId, type) {
+      if (type === "favorite") {
+        if (
+          this.userFavoritesIds &&
+          this.userFavoritesIds.some((fav) => fav.recipe_id === recipeId)
+        ) {
           this.isRecipeLiked = true;
-          return true
-        }else{
+          return true;
+        } else {
           this.isRecipeLiked = false;
           return false;
         }
-      }else if(type === 'bookmark'){
-        if(this.userBookmarksIds && this.userBookmarksIds.some(bookmark => bookmark.recipe_id === recipeId)){
+      } else if (type === "bookmark") {
+        if (
+          this.userBookmarksIds &&
+          this.userBookmarksIds.some(
+            (bookmark) => bookmark.recipe_id === recipeId
+          )
+        ) {
           this.isRecipeMarked = true;
           return true;
-        }else {
+        } else {
           this.isRecipeMarked = false;
           return false;
         }
       }
-    }
-
-    
+    },
   },
   computed: {
-    ...mapGetters(["userFavoritesIds","userBookmarksIds"]),
-     currentImage(){
-      return this.Recipes_by_pk.RecipeImages[this.activeImage].path
-    }
+    ...mapGetters([
+      "userFavoritesIds",
+      "userBookmarksIds",
+      "userBookmardedRecipes",
+    ]),
+    currentImage() {
+      return this.Recipes_by_pk.RecipeImages[this.activeImage].path;
+    },
+
+    getRatingValue() {
+      if (this.Recipes_by_pk.Rating != null) {
+        return this.Recipes_by_pk.Rating.ratingValue;
+      } else {
+        return 0;
+      }
+    },
+  },
+  created() {
+  },
+  setup() {
+    const toast = useToast();
+
+    // Make it available inside methods
+    return { toast };
   },
 };
 </script>

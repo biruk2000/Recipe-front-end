@@ -1,16 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import AddRecipe from "../views/User/AddRecipe.vue"
+import EditRecipe from "../views/User/EditRecipe.vue"
 import Favorites from "../views/User/Favorites.vue"
 import Profile from "../views/User/Profile.vue"
 import Saved from "../views/User/Saved.vue"
 import Recipe from "../views/Recipes/Recipe.vue"
+import FilteredRecipe  from "../views/User/FilterRecipe.vue"
+
+import NotFound from "../views/NotFound/index.vue" 
 
 import SignIn from '../views/Auth/SignIn.vue'
 import SignUp from '../views/Auth/SignUp.vue'
 
 import AuthLayout from "../layouts/AuthLayout.vue";
 import MainLayout from "../layouts/MainLayout.vue";
+
+import AuthGuard from '../utils/AuthGuard'
 
 
 const routes = [
@@ -33,6 +39,20 @@ const routes = [
         path: "",
         name: "AddRecipe",
         component: AddRecipe,
+        beforeEnter: AuthGuard
+      },
+    ],
+  },
+  {
+    path: "/editrecipe/:recipeId",
+    component: MainLayout,
+    children: [
+      {
+        path: "",
+        name: "editRecipe",
+        props: true,
+        component: EditRecipe,
+        beforeEnter: AuthGuard
       },
     ],
   },
@@ -45,6 +65,19 @@ const routes = [
         name: "recipe",
         props: true,
         component: Recipe,
+        beforeEnter: AuthGuard
+      },
+    ],
+  },
+  {
+    path: "/recipes/filter",
+    component: MainLayout,
+    children: [
+      {
+        path: "",
+        name: "filterRecipe",
+        props: true,
+        component: FilteredRecipe,
       },
     ],
   },
@@ -56,6 +89,7 @@ const routes = [
         path: "",
         name: "favorites",
         component: Favorites,
+        beforeEnter: AuthGuard
       },
     ],
   },
@@ -67,6 +101,7 @@ const routes = [
         path: "",
         name: "profile",
         component: Profile,
+        beforeEnter: AuthGuard
       },
     ],
   },
@@ -78,6 +113,7 @@ const routes = [
         path: "",
         name: "saved",
         component: Saved,
+        beforeEnter: AuthGuard
       },
     ],
   },
@@ -105,10 +141,23 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/:pathMatch(.*)*',
+    component: AuthLayout,
+    children: [
+      {
+        path: "",
+        name: "notfound",
+        component: NotFound,
+      },
+    ],
+  },
+
+
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   linkActiveClass: "active",
   linkExactActiveClass: "exact-active",
   routes,
